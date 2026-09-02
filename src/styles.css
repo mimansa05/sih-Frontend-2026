@@ -1,0 +1,291 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+/*
+ * Self-hosted Satoshi (Fontshare / Indian Type Foundry — see public/fonts/LICENSE.md).
+ *
+ * Must sit AFTER the @import rules: CSS requires @import to precede every other
+ * rule, and moving this above them makes the bundler drop `@import "tailwindcss"`
+ * entirely — which silently produces a page with no utility classes at all.
+ *
+ * Variable build, so one 42 KB file covers the whole weight axis. That matters
+ * because Satoshi's *static* set has no 600, and this dashboard uses
+ * `font-semibold` throughout — with static files every semibold would be
+ * synthesised or snapped to 700.
+ *
+ * `format("woff2")`, never `format("woff2-variations")`: the latter is a legacy
+ * keyword, and an unrecognised format token makes the browser skip the whole
+ * `src` and fall back silently. The `font-weight: 300 900` range descriptor is
+ * what actually enables variable weight selection.
+ */
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Variable.woff2") format("woff2");
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/*
+ * Plain @theme, deliberately NOT the `@theme inline` block below.
+ *
+ * Tailwind's preflight sets `html { font-family: var(--default-font-family) }`
+ * and its theme sets `--default-font-family: var(--font-sans)`, so this single
+ * token drives the whole document plus the `font-sans` utility.
+ *
+ * It must be plain `@theme` because `@theme inline` inlines the literal and
+ * never emits `--font-sans` as a runtime custom property — and the MapLibre
+ * override at the bottom of this file resolves `var(--font-sans)`. Merging this
+ * into the inline block would leave that variable undefined and silently revert
+ * the map and all its popups to Helvetica while the rest of the app looked fine.
+ */
+@theme {
+  --font-sans:
+    "Satoshi", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design system definition.
+ *
+ * The @theme inline block maps CSS custom properties to Tailwind utility
+ * classes (e.g. --color-primary -> bg-primary, text-primary).
+ *
+ * The :root and .dark blocks define the actual color values using oklch.
+ * All colors MUST use oklch format.
+ *
+ * To add a new semantic color:
+ * 1. Add the variable to :root (light value) and .dark (dark value)
+ * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.129 0.042 264.695);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.129 0.042 264.695);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.129 0.042 264.695);
+  --primary: oklch(0.208 0.042 265.755);
+  --primary-foreground: oklch(0.984 0.003 247.858);
+  --secondary: oklch(0.968 0.007 247.896);
+  --secondary-foreground: oklch(0.208 0.042 265.755);
+  --muted: oklch(0.968 0.007 247.896);
+  --muted-foreground: oklch(0.554 0.046 257.417);
+  --accent: oklch(0.968 0.007 247.896);
+  --accent-foreground: oklch(0.208 0.042 265.755);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(0.929 0.013 255.508);
+  --input: oklch(0.929 0.013 255.508);
+  --ring: oklch(0.704 0.04 256.788);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.984 0.003 247.858);
+  --sidebar-foreground: oklch(0.129 0.042 264.695);
+  --sidebar-primary: oklch(0.208 0.042 265.755);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.968 0.007 247.896);
+  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
+  --sidebar-border: oklch(0.929 0.013 255.508);
+  --sidebar-ring: oklch(0.704 0.04 256.788);
+}
+
+.dark {
+  --background: oklch(0.129 0.042 264.695);
+  --foreground: oklch(0.984 0.003 247.858);
+  --card: oklch(0.208 0.042 265.755);
+  --card-foreground: oklch(0.984 0.003 247.858);
+  --popover: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.984 0.003 247.858);
+  --primary: oklch(0.929 0.013 255.508);
+  --primary-foreground: oklch(0.208 0.042 265.755);
+  --secondary: oklch(0.279 0.041 260.031);
+  --secondary-foreground: oklch(0.984 0.003 247.858);
+  --muted: oklch(0.279 0.041 260.031);
+  --muted-foreground: oklch(0.704 0.04 256.788);
+  --accent: oklch(0.279 0.041 260.031);
+  --accent-foreground: oklch(0.984 0.003 247.858);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.551 0.027 264.364);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.208 0.042 265.755);
+  --sidebar-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.279 0.041 260.031);
+  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.551 0.027 264.364);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+}
+
+/*
+ * MapLibre popups reused as dashboard cards.
+ *
+ * The popup DOM lives outside React (MapLibre owns it), so it is styled here
+ * from the same design tokens the rest of the dashboard uses rather than
+ * MapLibre's default white bubble.
+ */
+/*
+ * maplibre-gl.css opens with `font: 12px/20px Helvetica Neue, ...` on
+ * .maplibregl-map — a SHORTHAND, so it resets font-family for the entire
+ * subtree. MapLibre appends popups *inside* the map container, so the popups,
+ * controls, scale and attribution never inherit from <body>: setting the app
+ * font on body alone leaves every one of them on Helvetica.
+ *
+ * Re-point the family only. The 12px/20px metrics are left alone because
+ * MapLibre's control sizing and compact-attribution layout depend on them.
+ *
+ * Specificity is deliberately (0,1,1) rather than (0,1,0): maplibre-gl.css is a
+ * JS import in DiscatraMap.tsx, so in dev Vite injects it as a runtime <style>
+ * *after* this stylesheet, and its order in the production bundle is not
+ * guaranteed. Matching MapLibre's specificity would be a coin flip.
+ */
+html .maplibregl-map {
+  font-family: var(--font-sans);
+}
+
+/*
+ * Form controls inside the map — the popup close button and the zoom/compass
+ * buttons — do not inherit font-family by default. Tailwind's preflight covers
+ * this, but preflight lives in @layer base while maplibre-gl.css is unlayered,
+ * so restate it here. Family only, never the `font` shorthand, which would
+ * clobber each control's own font-size.
+ */
+html .maplibregl-map button,
+html .maplibregl-map input,
+html .maplibregl-map select,
+html .maplibregl-map textarea {
+  font-family: inherit;
+}
+
+.discatra-popup .maplibregl-popup-content {
+  background-color: var(--color-card);
+  color: var(--color-card-foreground);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 30%);
+}
+
+.discatra-popup .maplibregl-popup-tip {
+  display: none;
+}
+
+.discatra-popup .maplibregl-popup-close-button {
+  color: var(--color-muted-foreground);
+  font-size: 1rem;
+  padding: 0 0.35rem;
+}
+
+.discatra-popup .maplibregl-popup-close-button:hover {
+  background-color: var(--color-accent);
+  color: var(--color-accent-foreground);
+}
+
+/*
+ * Print rules for the authority report route.
+ *
+ * The report is produced through the browser's own print dialog rather than a
+ * PDF library: text stays selectable, Satoshi renders correctly, and the app
+ * gains no dependency. Elements marked `no-print` are screen-only chrome.
+ */
+@media print {
+  @page {
+    size: A4;
+    margin: 18mm 16mm;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  .report-sheet {
+    max-width: none;
+    padding: 0;
+  }
+
+  /* A row split across a page break is unreadable in a formal document. */
+  tr,
+  .report-block {
+    break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+}
