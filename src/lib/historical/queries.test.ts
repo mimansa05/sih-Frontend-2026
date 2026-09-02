@@ -82,7 +82,7 @@ test("statesIn returns sorted distinct states", () => {
 test("the seeded catalogue is non-trivial and internally consistent", () => {
   expect(HISTORICAL_EVENTS.length).toBeGreaterThan(30);
   expect(new Set(HISTORICAL_EVENTS.map((e) => e.id)).size).toBe(HISTORICAL_EVENTS.length);
-  expect(HISTORICAL_EVENTS.every((e) => e.year >= 1990 && e.year <= 2025)).toBe(true);
+  expect(HISTORICAL_EVENTS.every((e) => e.year >= 1990 && e.year <= 2026)).toBe(true);
   expect(HISTORICAL_EVENTS.every((e) => e.deaths >= 0 && e.displaced >= 0)).toBe(true);
   expect(byHazard(HISTORICAL_EVENTS).length).toBe(4);
 });

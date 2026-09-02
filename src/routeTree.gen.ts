@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthorityRouteImport } from './routes/authority'
 import { Route as DataRouteImport } from './routes/data'
+import { Route as PlaceRouteImport } from './routes/place'
 import { Route as ReportRouteImport } from './routes/report'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const DataRoute = DataRouteImport.update({
   path: '/data',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlaceRoute = PlaceRouteImport.update({
+  id: '/place',
+  path: '/place',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReportRoute = ReportRouteImport.update({
   id: '/report',
   path: '/report',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/authority': typeof AuthorityRoute
   '/data': typeof DataRoute
+  '/place': typeof PlaceRoute
   '/report': typeof ReportRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/authority': typeof AuthorityRoute
   '/data': typeof DataRoute
+  '/place': typeof PlaceRoute
   '/report': typeof ReportRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/authority': typeof AuthorityRoute
   '/data': typeof DataRoute
+  '/place': typeof PlaceRoute
   '/report': typeof ReportRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/authority' | '/data' | '/report'
+  fullPaths: '/' | '/authority' | '/data' | '/place' | '/report'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/authority' | '/data' | '/report'
-  id: '__root__' | '/' | '/authority' | '/data' | '/report'
+  to: '/' | '/authority' | '/data' | '/place' | '/report'
+  id: '__root__' | '/' | '/authority' | '/data' | '/place' | '/report'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthorityRoute: typeof AuthorityRoute
   DataRoute: typeof DataRoute
+  PlaceRoute: typeof PlaceRoute
   ReportRoute: typeof ReportRoute
 }
 
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DataRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/place': {
+      id: '/place'
+      path: '/place'
+      fullPath: '/place'
+      preLoaderRoute: typeof PlaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/report': {
       id: '/report'
       path: '/report'
@@ -106,6 +123,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthorityRoute: AuthorityRoute,
   DataRoute: DataRoute,
+  PlaceRoute: PlaceRoute,
   ReportRoute: ReportRoute,
 }
 export const routeTree = rootRouteImport

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import {
   AlertTriangle,
   ArrowRight,
@@ -7,6 +8,7 @@ import {
   Cross,
   FileText,
   LifeBuoy,
+  Info,
   Loader2,
   MapPin,
   Navigation,
@@ -325,6 +327,16 @@ export default function RelocationPanel({
             tone={summary.capacityCovered ? "#16a34a" : "#ff8a1f"}
           />
         </div>
+
+        <Button variant="outline" size="sm" className="mt-3 w-full" asChild>
+          <Link to="/place" search={{ zone: zone.id }}>
+            <Info className="size-4" /> KNOW MORE ABOUT THIS AREA
+          </Link>
+        </Button>
+        <p className="mt-1.5 text-[10px] leading-relaxed text-muted-foreground">
+          Visual profile for {zone.district}: risk fingerprint, {zone.hazard.toLowerCase()} history
+          and cumulative toll.
+        </p>
 
         {!plan && (
           <Button className="mt-3 w-full" size="sm" onClick={onFindSites} disabled={planning}>

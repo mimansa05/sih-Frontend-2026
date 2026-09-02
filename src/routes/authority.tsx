@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Activity,
   ArrowLeft,
@@ -42,6 +42,8 @@ import { eventsPerYear, totals, worstEvents } from "@/lib/historical/queries";
 import { haversineKm, SAFE_SITES, summariseRiskArea } from "@/lib/relocation";
 
 export const Route = createFileRoute("/authority")({
+  validateSearch: (search: Record<string, unknown>): { zone?: string } =>
+    typeof search["zone"] === "string" && search["zone"] ? { zone: search["zone"] } : {},
   head: () => ({
     meta: [
       { title: "DISCATRA — Authority Risk Dashboard" },
@@ -208,6 +210,21 @@ function AreaDashboard({ zone }: { zone: RiskZone }) {
   const worst = useMemo(() => worstEvents(stateEvents, 6), [stateEvents]);
   const otherRisks = useMemo(() => otherRisksFor(zone), [zone]);
 
+  // How often this exact hazard has struck this place, on the demo record.
+  const hazardHistory = useMemo(() => {
+    const inState = HISTORICAL_EVENTS.filter(
+      (e) => e.state === zone.state && e.hazard === zone.type,
+    );
+    const inDistrict = inState.filter((e) => e.district === zone.district);
+    const years = inState.map((e) => e.year);
+    return {
+      state: inState.length,
+      district: inDistrict.length,
+      lastYear: years.length ? Math.max(...years) : null,
+      deaths: inState.reduce((n, e) => n + e.deaths, 0),
+    };
+  }, [zone]);
+
   return (
     <div className="space-y-6">
       {/* Identity */}
@@ -230,7 +247,7 @@ function AreaDashboard({ zone }: { zone: RiskZone }) {
       {/* 1 · Major risk */}
       <section className="rounded-lg border border-border bg-card p-4">
         <SectionHeading n={1} title="Major risk" />
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <Kpi
             label="Risk score"
             value={`${riskScore(zone)} / 100`}
@@ -258,10 +275,33 @@ function AreaDashboard({ zone }: { zone: RiskZone }) {
             icon={Building2}
             tone={summary.capacityCovered ? "#16a34a" : "#ff8a1f"}
           />
+          <Kpi
+            label={`${HAZARD_META[zone.type].label} events on record`}
+            value={num(hazardHistory.state)}
+            hint={
+              hazardHistory.lastYear
+                ? `${hazardHistory.district} in ${zone.district} · last ${hazardHistory.lastYear}`
+                : "none in the demo record"
+            }
+            icon={HistoryIcon}
+          />
         </div>
         <div className="mt-3 space-y-0.5">
           <Field label="Hazard category" value={HAZARD_META[zone.type].label} />
           <Field label="Specific hazard" value={zone.hazard} />
+          <Field
+            label={`Past ${HAZARD_META[zone.type].label.toLowerCase()} events`}
+            value={
+              hazardHistory.state === 0
+                ? "None on the demo record"
+                : `${hazardHistory.state} in ${zone.state}` +
+                  (hazardHistory.district > 0
+                    ? `, ${hazardHistory.district} in ${zone.district}`
+                    : "") +
+                  (hazardHistory.lastYear ? ` · most recent ${hazardHistory.lastYear}` : "") +
+                  (hazardHistory.deaths > 0 ? ` · ${num(hazardHistory.deaths)} lives lost` : "")
+            }
+          />
           <Field label="Relocation posture" value={summary.posture.headline} tone={meta.color} />
           <Field label="Recommended action" value={summary.posture.action} />
           <Field label="Eligible safe sites" value={`${summary.eligibleSiteCount} in range`} />
@@ -271,6 +311,18 @@ function AreaDashboard({ zone }: { zone: RiskZone }) {
       {/* 2 · History */}
       <section className="rounded-lg border border-border bg-card p-4">
         <SectionHeading n={2} title={`History — ${zone.state}`} />
+        <p className="mb-3 text-[11px] leading-relaxed text-muted-foreground">
+          {hazardHistory.state === 0
+            ? `No ${HAZARD_META[zone.type].label.toLowerCase()} events are on the demo record for ${zone.state}.`
+            : `${HAZARD_META[zone.type].label} — this area's hazard — has struck ${zone.state} ${hazardHistory.state} time${
+                hazardHistory.state === 1 ? "" : "s"
+              } on record` +
+              (hazardHistory.district > 0
+                ? `, ${hazardHistory.district} of them in ${zone.district} district`
+                : "") +
+              (hazardHistory.lastYear ? ` (most recent ${hazardHistory.lastYear})` : "") +
+              `. The figures below cover all hazards across ${zone.state}.`}
+        </p>
         {stateEvents.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             No calamity events are recorded for {zone.state} in the demo catalogue.
@@ -448,6 +500,7 @@ function AreaDashboard({ zone }: { zone: RiskZone }) {
 /* ── page shell ───────────────────────────────────────────────────────── */
 
 function AuthorityPage() {
+  const { zone: zoneParam } = Route.useSearch();
   const zones = useMemo(
     () =>
       [...RISK_ZONES].sort(
@@ -458,8 +511,15 @@ function AuthorityPage() {
     [],
   );
   const [selectedId, setSelectedId] = useState<string | null>(
-    zones.find((z) => z.level === "critical")?.id ?? zones[0]?.id ?? null,
+    (zoneParam && zones.find((z) => z.id === zoneParam)?.id) ??
+      zones.find((z) => z.level === "critical")?.id ??
+      zones[0]?.id ??
+      null,
   );
+  // Follow a later ?zone= change (e.g. arriving from a different red zone).
+  useEffect(() => {
+    if (zoneParam && zones.some((z) => z.id === zoneParam)) setSelectedId(zoneParam);
+  }, [zoneParam, zones]);
   const selected = zones.find((z) => z.id === selectedId) ?? null;
 
   return (

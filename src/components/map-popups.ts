@@ -29,20 +29,25 @@ export interface RiskPopupHandlers {
 }
 
 /**
- * Compact hover card for a risk area. Deliberately short — the two buttons
- * lead to the full detail / relocation panel rather than cramming everything in.
+ * Compact hover card for a risk area. Deliberately short — it must fit above or
+ * below the marker even on a shallow map, so the two drill-in buttons are never
+ * clipped. Everything else lives behind OPEN DETAILS.
  */
 export function riskHoverPopup(summary: RiskAreaSummary, handlers: RiskPopupHandlers): HTMLElement {
   const { zone } = summary;
+  const nearestHelpline = summary.helplines[0];
   const root = el("div", "w-60 space-y-2");
 
   root.appendChild(
     el(
       "div",
       "",
-      `<p class="${KEY}">Risk area</p>
-       <p class="text-sm font-semibold leading-tight text-foreground">${zone.name}</p>
-       <p class="text-[11px] text-muted-foreground">${zone.district}, ${zone.state}</p>`,
+      `<p class="text-sm font-semibold leading-tight text-foreground">${zone.name}</p>
+       <p class="text-[11px] text-muted-foreground">${zone.district}, ${zone.state}</p>
+       <p class="mt-1 text-[11px] leading-snug">
+         <span class="text-muted-foreground">${summary.hazards.join(", ")}</span>
+         · <span class="font-semibold" style="color:${summary.levelColor}">${summary.levelLabel.toUpperCase()}</span>
+       </p>`,
     ),
   );
 
@@ -50,37 +55,9 @@ export function riskHoverPopup(summary: RiskAreaSummary, handlers: RiskPopupHand
     el(
       "div",
       "rounded-md border border-border px-2 py-1.5",
-      `<div class="${ROW}"><span class="${KEY}">Overall risk</span>
-         <span class="text-xs font-semibold" style="color:${summary.levelColor}">
-           ${summary.levelLabel.toUpperCase()}
-         </span></div>
-       <div class="${ROW}"><span class="${KEY}">Risk score</span>
-         <span class="${VAL}">${summary.riskScore} / 100</span></div>`,
-    ),
-  );
-
-  root.appendChild(
-    el(
-      "div",
-      "",
-      `<p class="${KEY}">Hazards</p>
-       <ul class="mt-0.5 flex flex-wrap gap-1">
-         ${summary.hazards
-           .map(
-             (h) =>
-               `<li class="rounded border border-border px-1.5 py-0.5 text-[10px] text-foreground">${h}</li>`,
-           )
-           .join("")}
-       </ul>`,
-    ),
-  );
-
-  const nearestHelpline = summary.helplines[0];
-  root.appendChild(
-    el(
-      "div",
-      "rounded-md border border-border px-2 py-1.5",
-      `<div class="${ROW}"><span class="${KEY}">People at risk</span>
+      `<div class="${ROW}"><span class="${KEY}">Risk score</span>
+         <span class="${VAL}">${summary.riskScore} / 100</span></div>
+       <div class="${ROW}"><span class="${KEY}">People at risk</span>
          <span class="${VAL}">${num(summary.populationAtRisk)}</span></div>
        <div class="${ROW}"><span class="${KEY}">Safe capacity nearby</span>
          <span class="${VAL}" style="color:${summary.capacityCovered ? "#16a34a" : "#ff8a1f"}">
@@ -97,7 +74,7 @@ export function riskHoverPopup(summary: RiskAreaSummary, handlers: RiskPopupHand
     ),
   );
 
-  const actions = el("div", "flex gap-1.5 pt-0.5");
+  const actions = el("div", "flex gap-1.5");
   const details = el("button", `${BTN} border border-border hover:bg-accent`, "OPEN DETAILS");
   details.addEventListener("click", handlers.onDetails);
   actions.appendChild(details);
