@@ -60,6 +60,10 @@ export const HOSPITALS: Hospital[] = [
   // ── Kerala (Alappuzha) ───────────────────────────────────────────────
   { id: "hosp-kl-01", name: "Government Medical College Alappuzha", kind: "Medical college", state: "Kerala", district: "Alappuzha", lng: 76.339, lat: 9.492, beds: 680, helpline: "1800-100-2060" },
   { id: "hosp-kl-02", name: "District Hospital Alappuzha", kind: "District hospital", state: "Kerala", district: "Alappuzha", lng: 76.34, lat: 9.498, beds: 300, helpline: "1800-100-2061" },
+  { id: "hosp-kl-03", name: "Wayanad Institute of Medical Sciences", kind: "Medical college", state: "Kerala", district: "Wayanad", lng: 76.08, lat: 11.61, beds: 620, helpline: "1800-100-2062" },
+  // ── Sikkim (Mangan) ──────────────────────────────────────────────────
+  { id: "hosp-sk-01", name: "Mangan District Hospital", kind: "District hospital", state: "Sikkim", district: "Mangan", lng: 88.53, lat: 27.51, beds: 160, helpline: "1800-100-2110" },
+  { id: "hosp-sk-02", name: "STNM Hospital Gangtok", kind: "Medical college", state: "Sikkim", district: "Gangtok", lng: 88.606, lat: 27.329, beds: 1000, helpline: "1800-100-2111" },
   // ── Maharashtra (Raigad) ─────────────────────────────────────────────
   { id: "hosp-mh-01", name: "District Civil Hospital Alibag", kind: "District hospital", state: "Maharashtra", district: "Raigad", lng: 72.872, lat: 18.641, beds: 360, helpline: "1800-100-2070" },
   { id: "hosp-mh-02", name: "MGM Medical College Navi Mumbai", kind: "Medical college", state: "Maharashtra", district: "Raigad", lng: 73.017, lat: 19.045, beds: 820, helpline: "1800-100-2071" },

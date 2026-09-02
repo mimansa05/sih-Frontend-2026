@@ -25,6 +25,8 @@ export const HISTORICAL_EVENTS: HistoricalEvent[] = [
   { id: "h-2023-ls-uk", year: 2023, hazard: "landslide", name: "Joshimath subsidence crisis", state: "Uttarakhand", district: "Chamoli", deaths: 0, displaced: 3900, damageCr: 610 },
   { id: "h-2024-ls-kl", year: 2024, hazard: "landslide", name: "Wayanad slope failures", state: "Kerala", district: "Wayanad", deaths: 231, displaced: 10400, damageCr: 1210 },
   { id: "h-2025-ls-hp", year: 2025, hazard: "landslide", name: "Mandi NH-21 slide cluster", state: "Himachal Pradesh", district: "Mandi", deaths: 22, displaced: 3300, damageCr: 285 },
+  { id: "h-2023-ls-sk", year: 2023, hazard: "landslide", name: "North Sikkim Teesta slides", state: "Sikkim", district: "Mangan", deaths: 40, displaced: 6200, damageCr: 540 },
+  { id: "h-2026-ls-sk-man", year: 2026, hazard: "landslide", name: "Mangan Teesta valley slides", state: "Sikkim", district: "Mangan", deaths: 13, displaced: 2100, damageCr: 160 },
   // ── Flood ───────────────────────────────────────────────────────────────
   { id: "h-2008-fl-br", year: 2008, hazard: "flood", name: "Kosi embankment breach", state: "Bihar", district: "Supaul", deaths: 434, displaced: 2300000, damageCr: 5800 },
   { id: "h-2011-fl-as", year: 2011, hazard: "flood", name: "Brahmaputra basin floods", state: "Assam", district: "Dibrugarh", deaths: 78, displaced: 480000, damageCr: 1900 },

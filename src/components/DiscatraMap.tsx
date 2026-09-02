@@ -7,6 +7,7 @@ import {
   setWorkerUrl,
   type ExpressionSpecification,
   type FilterSpecification,
+  type LngLatLike,
   type StyleSpecification,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -587,49 +588,83 @@ export default function DiscatraMap({
      * otherwise the close button and any text in it are unreachable.
      */
     let sitePinned = false;
+    let siteCloseTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const cancelSiteClose = () => {
+      if (siteCloseTimer) clearTimeout(siteCloseTimer);
+      siteCloseTimer = null;
+    };
+    /*
+     * Same grace period as the risk hover: leaving the tiny marker must not
+     * yank the card away before the pointer can reach the links inside it.
+     */
+    const scheduleSiteClose = () => {
+      if (sitePinned || siteCloseTimer) return;
+      siteCloseTimer = setTimeout(() => {
+        siteCloseTimer = null;
+        if (!sitePinned) sitePopup.remove();
+      }, 260);
+    };
+    /** Show a site / hospital card, wiring the pointer-grace listeners on it. */
+    const showSiteCard = (lngLat: LngLatLike, node: HTMLElement) => {
+      cancelSiteClose();
+      node.addEventListener("mouseenter", cancelSiteClose);
+      node.addEventListener("mouseleave", scheduleSiteClose);
+      sitePopup.setLngLat(lngLat).setDOMContent(node).addTo(m);
+    };
 
     /** Only query layers that currently exist, or MapLibre throws. */
     const present = (ids: readonly string[]) => ids.filter((id) => m.getLayer(id));
-    const riskHit = ["risk-markers", "risk-zone-fill"];
+    /*
+     * The zone's tight centre pin and its broad translucent footprint are
+     * queried separately. The pin always wins a click; the footprint is only a
+     * fallback, so a hospital marker sitting *inside* a footprint stays
+     * clickable — only the zone's own pin outranks it.
+     */
+    const RISK_MARKER = ["risk-markers"];
+    const RISK_AREA = ["risk-zone-fill"];
+
+    const selectZone = (f: { properties?: Record<string, unknown> | null }) => {
+      sitePinned = false;
+      cancelSiteClose();
+      sitePopup.remove();
+      const zone = RISK_ZONES.find((z) => z.id === f.properties?.["id"]);
+      if (zone) {
+        closeHover();
+        onSelect.current(zone);
+        m.flyTo({ center: [zone.lng, zone.lat], zoom: Math.max(m.getZoom(), 9), speed: 0.9 });
+      }
+    };
 
     m.on("click", (e) => {
       const site = m.queryRenderedFeatures(e.point, { layers: present(SITE_LAYERS) })[0];
       if (site) {
         sitePinned = true;
-        sitePopup
-          .setLngLat(e.lngLat)
-          .setDOMContent(safeSitePopup(site.properties as unknown as SiteFeatureProps))
-          .addTo(m);
+        showSiteCard(e.lngLat, safeSitePopup(site.properties as unknown as SiteFeatureProps));
         return;
       }
-      /*
-       * Risk zones outrank the hospital reference layer on click: when a zone
-       * marker and a hospital pin overlap, the click still selects the zone.
-       * Hospitals are only reachable where no risk feature is under the cursor.
-       */
-      const f = m.queryRenderedFeatures(e.point, { layers: present(riskHit) })[0];
-      if (f) {
-        sitePinned = false;
-        sitePopup.remove();
-        const zone = RISK_ZONES.find((z) => z.id === f.properties?.["id"]);
-        if (zone) {
-          closeHover();
-          onSelect.current(zone);
-          m.flyTo({ center: [zone.lng, zone.lat], zoom: Math.max(m.getZoom(), 9), speed: 0.9 });
-        }
+      const marker = m.queryRenderedFeatures(e.point, { layers: present(RISK_MARKER) })[0];
+      if (marker) {
+        selectZone(marker);
         return;
       }
       const hospital = m.queryRenderedFeatures(e.point, { layers: present(HOSPITAL_LAYERS) })[0];
       if (hospital) {
         sitePinned = true;
         closeHover();
-        sitePopup
-          .setLngLat(e.lngLat)
-          .setDOMContent(hospitalPopup(hospital.properties as unknown as HospitalFeatureProps))
-          .addTo(m);
+        showSiteCard(
+          e.lngLat,
+          hospitalPopup(hospital.properties as unknown as HospitalFeatureProps),
+        );
+        return;
+      }
+      const area = m.queryRenderedFeatures(e.point, { layers: present(RISK_AREA) })[0];
+      if (area) {
+        selectZone(area);
         return;
       }
       sitePinned = false;
+      cancelSiteClose();
       sitePopup.remove();
     });
 
@@ -649,53 +684,47 @@ export default function DiscatraMap({
       if (!site) return;
       sitePinned = false;
       closeHover();
-      sitePopup
-        .setLngLat(e.lngLat)
-        .setDOMContent(safeSitePopup(site.properties as unknown as SiteFeatureProps))
-        .addTo(m);
+      showSiteCard(e.lngLat, safeSitePopup(site.properties as unknown as SiteFeatureProps));
     });
-    m.on("mouseleave", "site-markers", () => {
-      if (!sitePinned) sitePopup.remove();
-    });
+    m.on("mouseleave", "site-markers", scheduleSiteClose);
 
-    // Hospitals behave exactly like safe sites — hover opens the same shared
-    // card, click (above) pins it. A risk zone under the pointer wins, so the
-    // hospital card never hides a zone the operator is about to click.
+    // Hospitals behave like safe sites — hover opens the shared card, click
+    // (above) pins it. Only a zone's own centre pin suppresses the hospital
+    // card; sitting inside a zone's footprint does not.
     m.on("mouseenter", "hospital-markers", (e) => {
       const hospital = e.features?.[0];
       if (!hospital) return;
-      if (m.queryRenderedFeatures(e.point, { layers: present(riskHit) }).length > 0) return;
+      if (m.queryRenderedFeatures(e.point, { layers: present(RISK_MARKER) }).length > 0) return;
       sitePinned = false;
       closeHover();
-      sitePopup
-        .setLngLat(e.lngLat)
-        .setDOMContent(hospitalPopup(hospital.properties as unknown as HospitalFeatureProps))
-        .addTo(m);
+      showSiteCard(e.lngLat, hospitalPopup(hospital.properties as unknown as HospitalFeatureProps));
     });
-    m.on("mouseleave", "hospital-markers", () => {
-      if (!sitePinned) sitePopup.remove();
-    });
+    m.on("mouseleave", "hospital-markers", scheduleSiteClose);
 
     m.on("mousemove", (e) => {
       const site = m.queryRenderedFeatures(e.point, { layers: present(SITE_LAYERS) })[0];
-      const risk = m.queryRenderedFeatures(e.point, { layers: present(riskHit) })[0];
+      const marker = m.queryRenderedFeatures(e.point, { layers: present(RISK_MARKER) })[0];
       const hospital = m.queryRenderedFeatures(e.point, { layers: present(HOSPITAL_LAYERS) })[0];
-      m.getCanvas().style.cursor = site || risk || hospital ? "pointer" : "";
+      const area = m.queryRenderedFeatures(e.point, { layers: present(RISK_AREA) })[0];
+      m.getCanvas().style.cursor = site || marker || hospital || area ? "pointer" : "";
       /*
-       * Risk zones win the hover too. Safe sites drive their own card, so a
-       * site under the pointer suppresses the risk hover; a hospital does not —
-       * an overlapping zone still shows, and its hover replaces a stray
-       * hospital card.
+       * Risk hover shows for the zone pin or its footprint. A hospital under
+       * the cursor (with no zone pin) shows its own card instead, so an
+       * overlapping hospital stays reachable. Safe sites always suppress it.
        */
+      const riskFeature = marker ?? (hospital ? null : area);
       const zoneId =
-        !site && risk ? ((risk.properties?.["id"] as string | undefined) ?? null) : null;
+        !site && riskFeature
+          ? ((riskFeature.properties?.["id"] as string | undefined) ?? null)
+          : null;
       if (!zoneId) {
         scheduleClose();
         return;
       }
-      // A zone won the hover — clear any unpinned site/hospital card so the two
-      // never overlap.
-      if (!sitePinned) sitePopup.remove();
+      if (!sitePinned) {
+        cancelSiteClose();
+        sitePopup.remove();
+      }
       cancelClose();
       if (zoneId !== hoverId) showHover(zoneId);
     });
@@ -703,6 +732,7 @@ export default function DiscatraMap({
 
     return () => {
       cancelClose();
+      cancelSiteClose();
       hover.remove();
       sitePopup.remove();
       ro.disconnect();

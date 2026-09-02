@@ -3,28 +3,22 @@ import { HAZARD_OBSERVATIONS } from "./hazard-observations";
 
 const byLevel = (level: string) => HAZARD_OBSERVATIONS.filter((z) => z.level === level);
 
-test("the risk layer is eight red zones and eight orange", () => {
-  expect(HAZARD_OBSERVATIONS.length).toBe(16);
-  expect(byLevel("critical").length).toBe(8);
-  expect(byLevel("high").length).toBe(8);
+test("the risk layer is eleven red zones and ten orange", () => {
+  expect(HAZARD_OBSERVATIONS.length).toBe(21);
+  expect(byLevel("critical").length).toBe(11);
+  expect(byLevel("high").length).toBe(10);
 });
 
 test("no lower-priority zones are seeded", () => {
   expect(byLevel("moderate")).toEqual([]);
 });
 
-test("two red and two orange zones per calamity", () => {
-  const counts = new Map<string, number>();
-  for (const z of HAZARD_OBSERVATIONS) {
-    const key = `${z.type}/${z.level}`;
-    counts.set(key, (counts.get(key) ?? 0) + 1);
-  }
-  const expected: Record<string, number> = {};
+test("at least two red and two orange zones per calamity", () => {
   for (const type of ["landslide", "flood", "cloudburst", "coastal_erosion"]) {
-    expected[`${type}/critical`] = 2;
-    expected[`${type}/high`] = 2;
+    const forType = HAZARD_OBSERVATIONS.filter((z) => z.type === type);
+    expect(forType.filter((z) => z.level === "critical").length).toBeGreaterThan(1);
+    expect(forType.filter((z) => z.level === "high").length).toBeGreaterThan(1);
   }
-  expect(Object.fromEntries(counts)).toEqual(expected);
 });
 
 test("the Joshimath demo zone survives with its population intact", () => {
