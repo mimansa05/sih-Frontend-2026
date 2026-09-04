@@ -46,7 +46,7 @@ export const Route = createFileRoute("/authority")({
     typeof search["zone"] === "string" && search["zone"] ? { zone: search["zone"] } : {},
   head: () => ({
     meta: [
-      { title: "DISCATRA — Authority Risk Dashboard" },
+      { title: "RESCUE RASGULLA — Authority Risk Dashboard" },
       {
         name: "description",
         content:

@@ -42,7 +42,7 @@ export const Route = createFileRoute("/place")({
     typeof search["zone"] === "string" && search["zone"] ? { zone: search["zone"] } : {},
   head: () => ({
     meta: [
-      { title: "DISCATRA — Area Profile" },
+      { title: "RESCUE RASGULLA — Area Profile" },
       {
         name: "description",
         content:

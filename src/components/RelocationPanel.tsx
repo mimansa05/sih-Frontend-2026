@@ -65,7 +65,7 @@ function rescueWhatsAppHref(
   plan: RelocationPlan | null,
 ): string {
   const lines: string[] = [
-    "*DISCATRA — RESCUE / EMERGENCY CONTACT REQUEST*",
+    "*RESCUE RASGULLA — RESCUE / EMERGENCY CONTACT REQUEST*",
     `Raised: ${new Date().toLocaleString("en-IN")}`,
     "",
     "*AFFECTED AREA*",
@@ -111,7 +111,7 @@ function rescueWhatsAppHref(
   lines.push(
     "Please respond on this number about this calamity — coordination, resources and next steps.",
     "",
-    "- Sent from DISCATRA GIS Risk Command (demo build)",
+    "- Sent from RESCUE RASGULLA GIS Risk Command (demo build)",
   );
 
   return `https://wa.me/${RESCUE_CONTACT_PHONE}?text=${encodeURIComponent(lines.join("\n"))}`;
@@ -289,7 +289,7 @@ export default function RelocationPanel({
     const text = alerts.map((a) => a.message).join("\n\n----------\n\n");
     try {
       if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share({ title: `DISCATRA alert — ${zone.name}`, text });
+        await navigator.share({ title: `RESCUE RASGULLA alert — ${zone.name}`, text });
       } else {
         await navigator.clipboard.writeText(text);
       }

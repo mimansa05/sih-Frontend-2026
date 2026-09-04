@@ -65,17 +65,17 @@ const DiscatraMap = lazy(() => import("@/components/DiscatraMap"));
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "DISCATRA GIS — Live Disaster Risk Command Map of India" },
+      { title: "RESCUE RASGULLA GIS — Live Disaster Risk Command Map of India" },
       {
         name: "description",
         content:
-          "DISCATRA disaster-risk dashboard: real satellite and terrain basemap of India with live hazard heatmaps, red/orange/yellow risk zones, district-level drilldown and safe-route relocation planning.",
+          "RESCUE RASGULLA disaster-risk dashboard: real satellite and terrain basemap of India with live hazard heatmaps, red/orange/yellow risk zones, district-level drilldown and safe-route relocation planning.",
       },
-      { property: "og:title", content: "DISCATRA GIS — Disaster Risk Command Map" },
+      { property: "og:title", content: "RESCUE RASGULLA GIS — Disaster Risk Command Map" },
       {
         property: "og:description",
         content:
-          "Real satellite/terrain basemap with DISCATRA hazard heatmaps, district-level risk zones and safe relocation routing across India.",
+          "Real satellite/terrain basemap with RESCUE RASGULLA hazard heatmaps, district-level risk zones and safe relocation routing across India.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

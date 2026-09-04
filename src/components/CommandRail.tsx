@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { LayoutDashboard, Play, Siren } from "lucide-react";
+import { LayoutDashboard, Play } from "lucide-react";
 import ConsolePane from "@/components/ConsolePane";
 
 /**
@@ -115,11 +115,15 @@ export default function CommandRail() {
       className="relative hidden shrink-0 flex-col border-r border-border bg-sidebar md:flex"
     >
       <div className="flex items-center gap-2 border-b border-sidebar-border px-5 py-4">
-        <span className="grid size-8 place-items-center rounded-md bg-primary text-primary-foreground">
-          <Siren className="size-4" />
-        </span>
+        <img
+          src="/logo.png"
+          alt="Rescue Rasgulla"
+          width={36}
+          height={36}
+          className="size-9 shrink-0 rounded-full"
+        />
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold tracking-wide">DISCATRA</p>
+          <p className="truncate text-sm font-semibold tracking-wide">RESCUE RASGULLA</p>
           <p className="truncate text-[11px] text-muted-foreground">GIS Risk Command</p>
         </div>
       </div>

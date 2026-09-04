@@ -34,7 +34,7 @@ import {
 export const Route = createFileRoute("/data")({
   head: () => ({
     meta: [
-      { title: "DISCATRA — Historical Calamity Record" },
+      { title: "RESCUE RASGULLA — Historical Calamity Record" },
       {
         name: "description",
         content:

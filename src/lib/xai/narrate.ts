@@ -24,7 +24,7 @@ const num = (n: number) => n.toLocaleString("en-IN");
 
 export function narrateBoot(): LogSeed[] {
   return [
-    { level: "info", tag: "SYS", text: "DISCATRA risk engine online" },
+    { level: "info", tag: "SYS", text: "RESCUE RASGULLA risk engine online" },
     {
       level: "info",
       tag: "SAT",
